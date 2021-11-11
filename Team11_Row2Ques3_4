@@ -1,0 +1,37 @@
+-- Average Cumulative Years of Giving by Account Record Type
+
+ 
+
+SELECT AccountByCumulative.HH_ORG, Avg(AccountByCumulative.cumulativeyears), Count(*)
+FROM
+(SELECT  "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT".ID,case when "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT".RECORDTYPEID = '012G0000001BKhsIAG'then 'Organization'
+else 'Household'
+End as HH_ORG,
+count(distinct Extract( YEAR from "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY".CLOSEDATE) ) as cumulativeyears 
+FROM "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT"
+INNER JOIN "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY" 
+ON "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT".ID = "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY".ACCOUNTID 
+where "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY".CLOSEDATE > ADD_MONTHS(current_date(), -48)
+group by 1,2 ) AS AccountByCumulative
+group by 1
+
+ 
+
+
+--Distribution of Accounts by Cumulative Years of Giving and Account Record Type
+
+ 
+
+SELECT AccountByCumulative.HH_ORG, AccountByCumulative.cumulativeyears, Count(*)
+FROM
+(SELECT  "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT".ID,case when "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT".RECORDTYPEID = '012G0000001BKhsIAG'then 'Organization'
+else 'Household'
+End as HH_ORG,
+count(distinct Extract( YEAR from "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY".CLOSEDATE) ) as cumulativeyears 
+FROM "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT"
+INNER JOIN "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY" 
+ON "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT".ID = "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY".ACCOUNTID 
+where "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY".CLOSEDATE > ADD_MONTHS(current_date(), -48)
+group by 1,2 ) AS AccountByCumulative
+group by 1,2
+order by 1,2
