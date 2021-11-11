@@ -1,0 +1,26 @@
+// Total Number of Accounts  with Donations by Account Record Type and New/Existing Donor YoY and Cum YTD + Last 4
+
+use warehouse PROD_ADHOC_WH;
+
+SELECT 
+
+case when "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT".RECORDTYPEID = '012G0000001BKhsIAG'
+then 'Organization'
+else 'Household'
+End as HH_ORG,
+
+
+
+ "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT".TYPE as TYPE,  Extract( YEAR from "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY".CLOSEDATE) as DonationYear, 
+case when Extract( YEAR from "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY".CLOSEDATE) = Extract( YEAR from NPE01__FIRSTDONATIONDATE__C)  
+then 'New'
+else 'Existing' 
+End as DonorState,
+Sum("PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY".AMOUNT) as DonationsSum,
+Count(*) as Count
+FROM "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT"
+INNER JOIN "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY" 
+ON "PROD_CTF_RAW"."SRC_SF"."CTF_SF_ACCOUNT".ID = "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY".ACCOUNTID 
+where "PROD_CTF_RAW"."SRC_SF"."CTF_SF_OPPORTUNITY".CLOSEDATE > ADD_MONTHS(current_date(), -48)
+group by 1,2,3,4
+order by 1,2,3,4
